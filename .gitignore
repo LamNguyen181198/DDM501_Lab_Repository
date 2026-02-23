@@ -1,0 +1,5 @@
+movie-rating-api/venv/
+*./_pycache__/
+*.pyc
+models/svd_model.pkl
+.coverage
