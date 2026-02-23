@@ -2,8 +2,8 @@ from pydantic import BaseModel, Field, ConfigDict
 from typing import List, Optional
 
 class PredictionRequest(BaseModel):
-    user_id: str = Field(..., examples=["196"])
-    movie_id: str = Field(..., examples=["242"])
+    user_id: str = Field(..., examples=["196"], min_length=1)
+    movie_id: str = Field(..., examples=["242"], min_length=1)
 
 class PredictionResponse(BaseModel):
     model_config = ConfigDict(protected_namespaces=())

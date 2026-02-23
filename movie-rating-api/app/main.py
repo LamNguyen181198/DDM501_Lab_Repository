@@ -9,10 +9,20 @@ model = MovieRatingModel()
 
 @app.get("/health", response_model=HealthResponse)
 async def health_check():
+    """Check API health and model status."""
     return {"status": "healthy", "model_loaded": model is not None}
 
 @app.post("/predict", response_model=PredictionResponse)
 async def predict(request: PredictionRequest):
+    """Predict movie rating for a user using collaborative filtering (SVD).
+    
+    Args:
+        user_id: Unique user identifier
+        movie_id: Unique movie identifier
+        
+    Returns:
+        Predicted rating (1.0-5.0 scale) with metadata
+    """
     try:
         rating = model.predict(request.user_id, request.movie_id)
         return {

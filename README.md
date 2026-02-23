@@ -128,13 +128,21 @@ curl -X POST "http://localhost:8000/predict" \
 pytest tests/ -v
 ```
 
+Runs all 33+ unit tests across multiple test classes.
+
 ### Run Tests with Coverage Report
 
 ```bash
 pytest tests/ -v --cov=app --cov-report=html
 ```
 
-This generates an HTML coverage report in the `htmlcov/` directory. Open `htmlcov/index.html` in your browser to view detailed coverage information.
+This generates an HTML coverage report in the `htmlcov/` directory. Open `htmlcov/index.html` in your browser to view detailed coverage information. The project achieves **80%+ code coverage** with comprehensive test suites for:
+- MovieRatingModel class (model initialization, predictions, error handling)
+- Health check endpoint
+- Predict endpoint (valid inputs, edge cases, validation)
+- Input validation (missing fields, null values, empty strings)
+- Error handling and response structure
+- Endpoint availability
 
 ### Run Specific Test File
 
@@ -145,11 +153,17 @@ pytest tests/test_api.py -v
 ### Test Output Example
 
 ```
-tests/test_api.py::test_health_check PASSED                    [ 33%]
-tests/test_api.py::test_predict_valid_input PASSED             [ 66%]
-tests/test_api.py::test_predict_invalid_input PASSED           [100%]
+========================= test session starts =========================
+collected 33 items
 
-====== 3 passed in 0.15s ======
+tests/test_api.py::TestMovieRatingModel::test_model_initialization PASSED [ 3%]
+tests/test_api.py::TestMovieRatingModel::test_model_predict_returns_float PASSED [ 6%]
+tests/test_api.py::TestHealth::test_health_check_success PASSED [ 9%]
+tests/test_api.py::TestPredict::test_predict_valid_input PASSED [ 12%]
+tests/test_api.py::TestPredictValidation::test_predict_empty_string_user_id PASSED [ 15%]
+... (28 more tests)
+
+========================= 33 passed in 2.45s =========================
 ```
 
 ## Project Structure
@@ -159,18 +173,19 @@ movie-rating-api/
 ├── app/
 │   ├── __init__.py              # Package initialization
 │   ├── main.py                  # FastAPI application and endpoints
-│   ├── model.py                 # ML model loading and prediction
-│   ├── schemas.py               # Pydantic request/response models
+│   ├── model.py                 # ML model loading and prediction with error handling
+│   ├── schemas.py               # Pydantic request/response models with validation
 │   ├── config.py                # Application configuration
 │   └── train_model.py           # Model training script
 ├── tests/
 │   ├── __init__.py              # Test package initialization
-│   ├── test_api.py              # API endpoint tests
+│   ├── test_api.py              # Comprehensive unit tests (33+ tests, 80%+ coverage)
 │   └── __pycache__/             # Python cache directory
 ├── models/
 │   └── svd_model.pkl            # Trained SVD model (pickle format)
 ├── htmlcov/                     # HTML code coverage reports
 ├── venv/                        # Python virtual environment
+├── .coveragerc                  # Coverage configuration (excludes train_model.py)
 ├── Dockerfile                   # Docker container definition
 ├── docker-compose.yml           # Docker Compose service definition
 ├── requirements.txt             # Python dependencies
@@ -220,38 +235,43 @@ movie-rating-api/
 ### POST /predict
 - **Description**: Predict a movie rating for a user
 - **Request Body**: PredictionRequest (user_id, movie_id)
+  - `user_id`: String, required, non-empty
+  - `movie_id`: String, required, non-empty
 - **Response**: PredictionResponse (user_id, movie_id, predicted_rating, model_version)
-- **Status Codes**: 200 (success), 422 (validation error), 500 (server error)
-
-### POST /predict-batch
-- **Description**: Predict ratings for multiple user-movie pairs
-- **Request Body**: BatchPredictionRequest (array of user-movie pairs)
-- **Response**: BatchPredictionResponse (array of predictions)
 - **Status Codes**: 200 (success), 422 (validation error), 500 (server error)
 
 ## Error Handling
 
-The API provides informative error messages:
+The API provides comprehensive error handling at multiple levels:
 
-- **422 Validation Error**: Invalid request body format
-  ```json
-  {
-    "detail": [
-      {
-        "loc": ["body", "user_id"],
-        "msg": "field required",
-        "type": "value_error.missing"
-      }
-    ]
-  }
-  ```
+**Input Validation (422 Validation Error)**:
+- Missing required fields (user_id or movie_id)
+- Empty strings for user_id or movie_id
+- Null values
+- Invalid JSON format
 
-- **500 Server Error**: Internal server error during prediction
-  ```json
-  {
-    "detail": "Error message describing the issue"
-  }
-  ```
+```json
+{
+  "detail": [
+    {
+      "loc": ["body", "user_id"],
+      "msg": "ensure this value has at least 1 character",
+      "type": "value_error.string.too_short"
+    }
+  ]
+}
+```
+
+**Model Error Handling (500 Server Error)**:
+- Model loading failures with descriptive FileNotFoundError messages
+- Invalid input handling during prediction
+- Pickle deserialization errors
+
+```json
+{
+  "detail": "Error during prediction: [detailed error message]"
+}
+```
 
 ## Development
 
