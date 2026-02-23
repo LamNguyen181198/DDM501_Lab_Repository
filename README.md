@@ -10,7 +10,6 @@ A FastAPI-based REST API for predicting movie ratings using a machine learning m
 - **Comprehensive Testing**: Includes unit tests with code coverage reporting
 - **Health Monitoring**: Built-in health check endpoint
 - **Interactive API Documentation**: Auto-generated Swagger UI at `/docs`
-- **Batch Predictions**: Support for predicting ratings for multiple user-movie pairs
 - **Input Validation**: Pydantic-based request validation with detailed error messages
 
 ## Prerequisites
@@ -25,7 +24,7 @@ A FastAPI-based REST API for predicting movie ratings using a machine learning m
 
 1. **Clone the repository**:
    ```bash
-   cd DDM501_Lab_Repository/movie-rating-api
+   git clone https://github.com/LamNguyen181198/DDM501_Lab_Repository.git
    ```
 
 2. **Create a virtual environment**:
@@ -118,49 +117,6 @@ curl -X POST "http://localhost:8000/predict" \
   "movie_id": "242",
   "predicted_rating": 4.25,
   "model_version": "1.0.0"
-}
-```
-
-### Batch Predictions
-
-Predict ratings for multiple user-movie pairs:
-
-**Request**:
-```bash
-curl -X POST "http://localhost:8000/predict-batch" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "pairs": [
-      {"user_id": "196", "movie_id": "242"},
-      {"user_id": "196", "movie_id": "302"},
-      {"user_id": "1", "movie_id": "1"}
-    ]
-  }'
-```
-
-**Response**:
-```json
-{
-  "predictions": [
-    {
-      "user_id": "196",
-      "movie_id": "242",
-      "predicted_rating": 4.25,
-      "model_version": "1.0.0"
-    },
-    {
-      "user_id": "196",
-      "movie_id": "302",
-      "predicted_rating": 3.75,
-      "model_version": "1.0.0"
-    },
-    {
-      "user_id": "1",
-      "movie_id": "1",
-      "predicted_rating": 4.5,
-      "model_version": "1.0.0"
-    }
-  ]
 }
 ```
 
@@ -308,12 +264,6 @@ uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 The `--reload` flag automatically restarts the server when code changes are detected.
 
 ### Model Training
-
-To train a new SVD model:
-
-```bash
-python -m app.train_model
-```
 
 This will train the model on the MovieLens dataset and save it to `models/svd_model.pkl`.
 
