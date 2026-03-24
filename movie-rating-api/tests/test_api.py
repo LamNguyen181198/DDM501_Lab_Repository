@@ -2,6 +2,7 @@ import pytest
 from fastapi.testclient import TestClient
 from app.main import app
 from app.model import MovieRatingModel
+from app.config import settings
 
 client = TestClient(app)
 
@@ -24,7 +25,7 @@ class TestMovieRatingModel:
         """Test predict returns rating in valid range."""
         model = MovieRatingModel()
         result = model.predict("196", "242")
-        assert 0.0 <= result <= 5.0
+        assert 1.0 <= result <= 5.0
     
     def test_model_predict_batch(self):
         """Test predict_batch returns list of floats."""
@@ -35,7 +36,7 @@ class TestMovieRatingModel:
         assert len(results) == 3
         for result in results:
             assert isinstance(result, float)
-            assert 0.0 <= result <= 5.0
+            assert 1.0 <= result <= 5.0
     
     def test_model_predict_batch_empty_list(self):
         """Test predict_batch raises error for empty list."""
@@ -53,7 +54,7 @@ class TestMovieRatingModel:
         for user_id, movie_id in test_cases:
             result = model.predict(user_id, movie_id)
             assert isinstance(result, float)
-            assert 0.0 <= result <= 5.0
+            assert 1.0 <= result <= 5.0
     
     def test_model_predict_consistency(self):
         """Test predict returns same result for same inputs."""
@@ -120,7 +121,7 @@ class TestPredict:
         """Test predicted rating is within valid range (1.0-5.0)."""
         response = client.post("/predict", json={"user_id": "196", "movie_id": "242"})
         data = response.json()
-        assert 0.0 <= data["predicted_rating"] <= 5.0
+        assert 1.0 <= data["predicted_rating"] <= 5.0
     
     def test_predict_rating_is_float(self):
         """Test predicted rating is a float/numeric value."""
@@ -132,7 +133,7 @@ class TestPredict:
         """Test model version is included in response."""
         response = client.post("/predict", json={"user_id": "196", "movie_id": "242"})
         data = response.json()
-        assert data["model_version"] == "1.0.0"
+        assert data["model_version"] == settings.model_version
     
     def test_predict_different_user_movie_pair(self):
         """Test predict with different user-movie pair."""
@@ -141,7 +142,7 @@ class TestPredict:
         data = response.json()
         assert data["user_id"] == "1"
         assert data["movie_id"] == "1"
-        assert 0.0 <= data["predicted_rating"] <= 5.0
+        assert 1.0 <= data["predicted_rating"] <= 5.0
     
     def test_predict_with_string_ids(self):
         """Test predict accepts string IDs."""

@@ -120,6 +120,8 @@ curl -X POST "http://localhost:8000/predict" \
 }
 ```
 
+The API returns a bounded predicted rating in the range **1.0 to 5.0**.
+
 ## Running Tests
 
 ### Run All Tests
@@ -206,6 +208,19 @@ movie-rating-api/
 
 - **models/**: Directory for storing trained models
   - `svd_model.pkl`: Serialized trained SVD model
+
+## Configuration
+
+The application supports environment-based configuration:
+
+- `MODEL_PATH`: Path to the trained model file (default: `models/svd_model.pkl`)
+- `MODEL_VERSION`: Version string returned by `/predict` responses (default: `1.0.0`)
+
+Example:
+
+```bash
+MODEL_PATH=/app/models/svd_model.pkl MODEL_VERSION=1.0.0 uvicorn app.main:app --host 0.0.0.0 --port 8000
+```
 
 - **htmlcov/**: Code coverage reports (generated after running tests with coverage)
 
