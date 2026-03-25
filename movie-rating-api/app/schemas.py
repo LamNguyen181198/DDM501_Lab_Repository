@@ -18,3 +18,10 @@ class HealthResponse(BaseModel):
     
     status: str
     model_loaded: bool
+
+class ModelInfoResponse(BaseModel):
+    model_config = ConfigDict(protected_namespaces=())
+    
+    version: str
+    description: str
+    metrics: dict

@@ -261,3 +261,17 @@ class TestEndpointAvailability:
         """Test /predict endpoint is available."""
         response = client.post("/predict", json={"user_id": "1", "movie_id": "1"})
         assert response.status_code in [200, 422]  # Should exist (200 or validation error 422)
+
+
+class TestModelInfo:
+    """Test suite for model info endpoint."""
+    
+    def test_model_info_success(self):
+        """Test successful model info request."""
+        response = client.get("/model/info")
+        assert response.status_code == 200
+        data = response.json()
+        assert "version" in data
+        assert "description" in data
+        assert "metrics" in data
+        assert data["version"] == settings.model_version
